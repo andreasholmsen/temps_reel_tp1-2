@@ -8,8 +8,13 @@ int main ( void )
 	GPIOA->CRL &= ~(0xF<<4) ;
 	GPIOA->CRL |= (0x2<<4) ;
 	
+	
+	Stack_Init_Dummies();
 	SysTick_Init();
-	Processor_Mode_Init();
+	__set_PSP(0x20000400);
+	__set_CONTROL(__get_CONTROL() | 0x2);
+	
+	//Processor_Mode_Init();
 	
 	
 	
