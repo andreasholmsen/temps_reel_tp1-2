@@ -1,4 +1,5 @@
 #include "stm32f10x.h"
+#include "timer.h"
 
 int main ( void )
 {
@@ -6,6 +7,14 @@ int main ( void )
 	
 	GPIOA->CRL &= ~(0xF<<4) ;
 	GPIOA->CRL |= (0x2<<4) ;
+	
+	SysTick_Init();
+	Processor_Mode_Init();
+	
+	
+	
+	
+	
 	while (1)
 	{
 	}
