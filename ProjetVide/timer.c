@@ -20,8 +20,10 @@ int alternate_dummy = 0;
 void SysTick_Handler ( void ) {
 	alternate_dummy = (alternate_dummy + 1) % 2;
 	
+	
 	if (alternate_dummy) {
 		__set_PSP(0x20001000);
+		
 	} else {
 		__set_PSP(0x20002000);
 	}
@@ -50,17 +52,19 @@ void Dummy_function_2() {
 void Stack_Init_Dummies() {
 	// Our init values
 	// xPSR, PC, LR, R12, R3, R2, R1, R0
-	int registervalues[7] 	= {0x01000000, 0x12345678, 0xFFFFFFFD, 0x00, 0x00, 0x00, 0x00};
+	uint32_t registervalues1[7] 	= {0x01000000, (uint32_t) Dummy_function_1, 0xFFFFFFFD, 0x00, 0x00, 0x00, 0x00};
+	uint32_t registervalues2[7] 	= {0x01000000, (uint32_t) Dummy_function_2, 0xFFFFFFFD, 0x00, 0x00, 0x00, 0x00};
+	
 	
 	// Start point, dummy_1 and dummy_2
-	int * dummy_1_psp = (int *) 0x20001000;
-	int * dummy_2_psp = (int *) 0x20002000;
+	uint32_t * dummy_1_psp = (uint32_t *) 0x20001000;
+	uint32_t * dummy_2_psp = (uint32_t *) 0x20002000;
 	
 	
 	// Dummy 1 init
 	for (int i = 0; i < 7; i++) {
 		dummy_1_psp += 1;
-		*(dummy_1_psp) = registervalues[i];
+		*(dummy_1_psp) = registervalues1[i];
 	}
 	
 	
@@ -68,12 +72,12 @@ void Stack_Init_Dummies() {
 	// Dummy 2 init
 	for (int i = 0; i < 7; i++) {
 		dummy_2_psp += 1;
-		*(dummy_2_psp) = registervalues[i];
-	
+		*(dummy_2_psp) = registervalues2[i];
 	}
 	
-	
-	
+	while (1)
+	{
+	}
 	
 	
 }

@@ -9,18 +9,12 @@ int main ( void )
 	GPIOA->CRL |= (0x2<<4) ;
 	
 	
-	Stack_Init_Dummies();
+	
 	SysTick_Init();
-	__set_PSP(0x20004000);
-	__set_CONTROL(3);
+	 // __set_PSP(0x20004000);
+	// __set_CONTROL(3);
+	
+	Stack_Init_Dummies();
 	
 	//Processor_Mode_Init();
-	
-	
-	
-	
-	
-	while (1)
-	{
-	}
 }
