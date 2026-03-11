@@ -15,12 +15,16 @@ void SysTick_Init() {
 	SysTick->CTRL |= SysTick_CTRL_CLKSOURCE;
 }
 
-	int alternate_dummy = 0;
+int alternate_dummy = 0;
 	
 void SysTick_Handler ( void ) {
 	alternate_dummy = (alternate_dummy + 1) % 2;
 	
-	alternate_dummy ? Dummy_function_1() : Dummy_function_2();
+	if (alternate_dummy) {
+		__set_PSP(0x20001000);
+	} else {
+		__set_PSP(0x20002000);
+	}
 }
 
 
@@ -33,14 +37,14 @@ void Processor_Mode_Init() {
 	
 }
 
+int a = 0;
 void Dummy_function_1() {
-	while(1){
-	}
+	while(1) a++;
 }
 
+int b  =0;
 void Dummy_function_2() {
-	while(1){
-	}
+	while(1) b++;
 }
 
 void Stack_Init_Dummies() {

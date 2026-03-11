@@ -11,8 +11,8 @@ int main ( void )
 	
 	Stack_Init_Dummies();
 	SysTick_Init();
-	__set_PSP(0x20000400);
-	__set_CONTROL(__get_CONTROL() | 0x2);
+	__set_PSP(0x20004000);
+	__set_CONTROL(3);
 	
 	//Processor_Mode_Init();
 	
