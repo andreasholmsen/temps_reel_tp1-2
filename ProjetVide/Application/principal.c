@@ -16,5 +16,9 @@ int main ( void )
 	
 	Stack_Init_Dummies();
 	
-	//Processor_Mode_Init();
+	Processor_Mode_Init();
+	
+	while (1)
+	{
+	}
 }
