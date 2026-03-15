@@ -15,4 +15,6 @@ void Dummy_function_1();
 
 void Dummy_function_2();
 
+void Dummy_function_3();
+
 void Stack_Init_Dummies();

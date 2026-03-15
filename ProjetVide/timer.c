@@ -2,8 +2,12 @@
 #include "stm32f10x.h"
 #include "timer.h"
 
-uint32_t *dummy_address_1 = (uint32_t *) 0x20001000;
-uint32_t *dummy_address_2 = (uint32_t *) 0x20002000;
+// PSP Stack frames
+uint32_t *dummy_address_1 = (uint32_t *) 0x20002000;
+uint32_t *dummy_address_2 = (uint32_t *) 0x20004000;
+
+uint32_t *dummy_psp_1;
+uint32_t *dummy_psp_2;
 
 
 void SysTick_Init() {
@@ -14,68 +18,84 @@ void SysTick_Init() {
 	SysTick->VAL = SysTick->LOAD;
 	
 	// enable SysTick, exception request and use the internal clock
-	SysTick->CTRL |= SysTick_CTRL_ENABLE;
-	SysTick->CTRL |= SysTick_CTRL_TICKINT;
-	SysTick->CTRL |= SysTick_CTRL_CLKSOURCE;
+	SysTick->CTRL |= SysTick_CTRL_ENABLE + SysTick_CTRL_TICKINT + SysTick_CTRL_CLKSOURCE;
 }
 
-int alternate_dummy = 0;
+int alternate_dummy = 1;
 	
 void SysTick_Handler ( void ) {
-	alternate_dummy = (alternate_dummy + 1) % 2;
 	
 	uint32_t * current_PSP  = (uint32_t*) __get_PSP();
 	
 	if (alternate_dummy) {
-		dummy_address_2 = current_PSP;
-		__set_PSP( (uint32_t) dummy_address_1); // +6
+		alternate_dummy = 0;
+		dummy_psp_2 = current_PSP;
+		__set_PSP( (uint32_t) dummy_psp_1);
 		
 	} else {
-		dummy_address_1 = current_PSP;
-		__set_PSP((uint32_t) dummy_address_2); // +6
+		alternate_dummy = 1;
+		dummy_psp_1 = current_PSP;
+		__set_PSP((uint32_t) dummy_psp_2);
 	}
 }
 
 
 void Processor_Mode_Init() {
 	
-	__set_PSP((uint32_t)dummy_address_1);
+	__set_PSP((uint32_t) dummy_psp_1);
 	// Switch Thread mode to unprivileged and to PSP
 	// __get_CONTROL() | 0x3
-	__set_CONTROL(__get_CONTROL() | 0x3);
+	__set_CONTROL(3);
 	
 }
 
-int a = 0;
 void Dummy_function_1() {
-	while(1) a++;
+	while(1);
 }
 
-int b  =0;
 void Dummy_function_2() {
-	while(1) b++;
+	while(1);
+}
+
+// Init while waiting for exception
+void Dummy_function_3() {
+	while(1);
 }
 
 void Stack_Init_Dummies() {
 	// Our init values
 	// 																	xPSR, 								PC, 							LR, 			R12, 	R3, 		R2, 	R1, 	R0
-	uint32_t registervalues1[8] 	= {0x01000000, (uint32_t) Dummy_function_1, 0xFFFFFFFD, 0x01, 0x02, 0x03, 0x04, 0x05};
-	uint32_t registervalues2[8] 	= {0x01000000, (uint32_t) Dummy_function_2, 0xFFFFFFFD, 0x06, 0x07, 0x08, 0x09, 0x0A};
+	uint32_t registervalues1[8] = {
+        0x00000000, // R0
+        0x00000001, // R1
+        0x00000002, // R2
+        0x00000003, // R3
+        0x0000000C, // R12
+        0xFFFFFFFD, // LR (EXC_RETURN: return to Thread mode, use PSP, unprivileged)
+        (uint32_t)Dummy_function_1, // PC
+        0x01000000  // xPSR (Thumb bit set)
+    };
+	uint32_t registervalues2[8] = {
+			0x00000000, // R0
+			0x00000010, // R1
+			0x00000020, // R2
+			0x00000030, // R3
+			0x000000C0, // R12
+			0xFFFFFFFD, // LR
+			(uint32_t)Dummy_function_2, // PC
+			0x01000000  // xPSR
+	};
+
+		
+	// Move down by 8 words (32 bytes) for the stack frame
+	dummy_psp_1 = dummy_address_1 - 8;
+	dummy_psp_2 = dummy_address_2 - 8;
 	
 	
-	
-	// Dummy 1 init
+	// Dummy init
 	for (int i = 0; i < 8; i++) {
-		*(--dummy_address_1) = registervalues1[i];
-	}
-	
-	
-	
-	// Dummy 2 init
-	for (int i = 0; i < 8; i++) {
-		*(--dummy_address_2) = registervalues2[i];
-	}
-	
-	
+        dummy_psp_1[i] = registervalues1[i];
+        dummy_psp_2[i] = registervalues2[i];
+    }
 }
 
