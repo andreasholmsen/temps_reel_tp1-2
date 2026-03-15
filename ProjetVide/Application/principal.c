@@ -18,7 +18,6 @@ int main ( void )
 
 	
 	SysTick_Init();
-	__set_PSP((uint32_t)(dummy_psp_2 + 8));
 	__set_CONTROL(3);
 
 	while (1)

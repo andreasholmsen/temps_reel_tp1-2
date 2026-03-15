@@ -22,21 +22,29 @@ void SysTick_Init() {
 }
 
 int alternate_dummy = 1;
-	
+int startup = 1;
+
+
 void SysTick_Handler ( void ) {
+	if (startup) {
+		startup = 0;
+		__set_PSP((uint32_t) dummy_psp_2);
+		return;
+	}
 	
-	uint32_t * current_PSP  = (uint32_t*) __get_PSP();
+	
 	
 	if (alternate_dummy) {
 		alternate_dummy = 0;
-		dummy_psp_2 = current_PSP;
+		 dummy_psp_2 = (uint32_t *) __get_PSP();
 		__set_PSP( (uint32_t) dummy_psp_1);
 		
 	} else {
 		alternate_dummy = 1;
-		dummy_psp_1 = current_PSP;
+		dummy_psp_1 = (uint32_t *)__get_PSP();
 		__set_PSP((uint32_t) dummy_psp_2);
 	}
+	__set_CONTROL(3);
 }
 
 
@@ -49,17 +57,19 @@ void Processor_Mode_Init() {
 	
 }
 
+int a = 0;
 void Dummy_function_1() {
-	while(1);
+	a = 0;
+	while(1) {
+		a++;
+		
+	}
 }
 
 void Dummy_function_2() {
-	while(1);
-}
-
-// Init while waiting for exception
-void Dummy_function_3() {
-	while(1);
+	while(1) {
+		
+	}
 }
 
 void Stack_Init_Dummies() {
